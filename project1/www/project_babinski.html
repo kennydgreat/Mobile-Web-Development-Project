@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Security-Policy" />
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+ 
+        <link rel="stylesheet" href="css/jquery.mobile.min.css">
+
+        <title>Project 1</title>
+    </head>
+    <body>
+
+          <div data-role="page" id="storage">
+            <div data-role="content">
+                <form id="myForm" action="#" method="post">
+                <div class="ui-field-contain">
+                   <label for="name">Full Name</label>
+                   <input data-corners="false" type="text" id="name" name="name" autofocus placeholder="Enter your full name">
+                </div>
+                
+                <div class="ui-field-contain">
+                   <label for="email">Email</label>
+                   <input data-corners="false" type="text" id="email" name="email" placeholder="Enter your e-mail">
+                </div>
+                
+                <div class="ui-field-contain">
+                    <label for="age">Age:</label>
+                    <input data-corners="false" type="range" name="age" id="age" min="1" max="130" value="20">
+                </div>
+                
+                <div data-role="popup" id="pop" data-position-to="window" data-transition="turn"></div>
+
+                <button id="saveBtn" type="button" class="ui-btn ui-icon-star ui-btn-icon-left">Save Info</button>
+                <button id="getBtn" type="button" class="ui-btn ui-icon-action ui-btn-icon-left">Get Info</button>
+                <button id="clearBtn" type="reset" class="ui-btn ui-icon-recycle ui-btn-icon-left">Clear Form</button>
+
+                </form>
+            </div>
+        </div>    
+  
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.mobile.min.js"></script>
+
+<script>
+var jqmReady=$.Deferred();
+var pgReady=$.Deferred();
+
+$(document).on("pagecreate",  jqmReady.resolve);
+document.addEventListener("deviceready",pgReady.resolve,false);
+//window.addEventListener("load",pgReady.resolve,false);
+
+$.when(jqmReady,pgReady).then (function() {
+
+    var $name=$("#name");
+    var $email=$("#email");
+    var $age=$("#age");
+    var $pop=$("#pop");
+
+    $("#saveBtn").click(function(event){
+        event.preventDefault();
+        var name=$name.val().trim();
+        var email=$email.val().trim().toLowerCase();
+        var age=$age.val().trim();
+
+        var errMsg='';
+        if (email.length<1) {
+            errMsg +="Email cannot be empty!<br />";
+        }
+        if (name.length <1) {
+            errMsg +="Name cannot be empty!<br />";
+        }
+
+        if (errMsg) {
+            showPopup(errMsg);
+            return true;
+        }
+        else {
+            var student={name:name, age:age};
+            localStorage.setItem(email, JSON.stringify(student));
+
+            navigator.notification.alert("Information saved", null, "Save Info", "Ok");
+            document.getElementById("myForm").reset();
+        }
+
+    });
+
+    $("#clearBtn").click(function(event){
+        $name.focus();
+    });
+
+    $("#getBtn").click(function(event){
+        event.preventDefault();
+         var email = $email.val().trim();
+         if (email.length<1) {
+             showPopup("Email cannot be empty!");
+             return true;
+         }
+
+        var student=localStorage.getItem(email);
+        if (!student) {
+            showPopup("Email doesn't exist!");
+            return true;
+        }
+
+
+        student = JSON.parse( student );
+              $name.val(student.name);
+              $age.val(student.age).slider("refresh");
+
+    });
+
+    function showPopup(message) {
+            $pop.html('<p>'+message+'</p>').popup("open"); 
+            setTimeout(function(){  $pop.popup("close"); }, 1000);
+    }
+
+
+
+});
+</script>
+</body></html>
